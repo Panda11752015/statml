@@ -1,0 +1,86 @@
+import numpy as np
+## DATA GENERATOR
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
+from sklearn.decomposition import PCA
+
+dim = 9
+def data_generator (seed , n, dim ):
+    # fixed means (as in the solutions )
+    mu1 = [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    mu2 = [0, 0, 0, 0, 0, 0, 1, 1, 1]
+    mu3 = [0, 0, 0, 1, 1, 1, 0, 0, 0]
+    # modern , reproducible RNG
+    rng = np. random . default_rng ( seed )
+    datapoints = np. zeros ((n, dim), dtype = float )
+    labels = np. zeros (n, dtype = int)
+    cov1 = np. diag ([1, 1, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+    cov2 = np. diag ([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 1, 1])
+    cov3 = np. diag ([0.1, 0.1, 0.1, 1, 1, 1, 0.1, 0.1, 0.1])
+    for i in range (n):
+        rand_int = rng. integers (1, 4) # {1,2,3}
+        if rand_int == 1:
+            datapoints [i] = rng. multivariate_normal (mu1 , cov1 )
+        elif rand_int == 2:
+            datapoints [i] = rng. multivariate_normal (mu2 , cov2 )
+        else :
+            datapoints [i] = rng. multivariate_normal (mu3 , cov3 )
+        labels [i] = rand_int
+    return datapoints , labels
+
+n = [100, 200, 300, 400, 500]
+
+seednum = 100
+avg_randindex = []
+std_randindex = []
+avg_randindex2 = []
+std_randindex2 = []
+for i in n:
+    Randindex = []
+    Randindex2 = []
+    for j in range(seednum): # at 100 so generate 100 dataset
+        datapts, labels = data_generator (seed =  j, n = i, dim = dim )
+        
+        pca = PCA(n_components=3)
+        X_projected = pca.fit_transform(datapts)
+
+        kmeans = KMeans(n_clusters = 3) #, random_state = 42 )
+        kmeans.fit(datapts)
+        randindex = adjusted_rand_score (labels , kmeans.labels_)
+
+        Randindex.append(randindex)
+
+        kmeans2 = KMeans(n_clusters = 3) #, random_state = 42 )
+        kmeans2.fit(X_projected)
+        randindex2 = adjusted_rand_score (labels , kmeans2.labels_)
+
+        Randindex2.append(randindex2)
+    # Rx = np.mean(Randindex)
+    # avg_randindex.append(Rx)
+    avg_randindex.append(np.mean(Randindex))
+    #avg_randindex.append(Rx)
+    std_randindex.append(np.std(Randindex))
+
+    # Rx = np.mean(Randindex2)
+    # avg_randindex2.append(Rx)
+    avg_randindex2.append(np.mean(Randindex2))
+    #avg_randindex2.append(Rx)
+    std_randindex2.append(np.std(Randindex2))
+#print(len(avg_randindex))
+
+#plt.plot(n, avg_randindex, marker='o')
+plt.errorbar(n, avg_randindex, yerr=std_randindex, fmt='-o', capsize=5)
+plt.grid()
+plt.ylim(0, 1)
+
+plt.title('Average Rand Index vs n')
+plt.xlabel('n')
+plt.ylabel('Average Rand Index')
+plt.errorbar(n, avg_randindex2, yerr=std_randindex2, fmt='-o', capsize=5, color='orange')
+
+plt.show()
+
+
+
