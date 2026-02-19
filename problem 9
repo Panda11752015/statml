@@ -1,0 +1,84 @@
+import random
+import math
+import numpy as np
+from sklearn . cluster import KMeans , MeanShift , SpectralClustering
+from sklearn.cluster import estimate_bandwidth
+import matplotlib.pyplot as plt
+
+random . seed (0)
+## Data set 1
+X1 = []
+for i in range ( 1000 ):
+    theta = random . uniform (0, 2 * math .pi)
+    radius = random . gauss (0, 0.2) + random . choice ([1, 3])
+    X1. append ([ radius * math . cos( theta ), radius * math . sin( theta )])
+X1 = np. array (X1)
+## Data set 2
+X2 = []
+for i in range ( 1000 ):
+    theta = random . uniform (0, 2 * math .pi)
+    radius = random . gauss (0, 0.1) + 2
+    if theta < math .pi:
+        X2. append ([ radius * math . cos( theta ) - 1, radius * math . sin( theta )])
+    else :
+        X2. append ([ radius * math . cos( theta ) + 1, radius * math . sin( theta )])
+X2 = np. array (X2)
+## Data set 3
+X3 = []
+for i in range ( 1000 ):
+    radius = random . gauss (0, 1)
+    theta = random . uniform (0, 2 * math .pi)
+    center = random . choice ([[0, 1], [3, 3], [1, -3]])
+    X3. append ([ radius * math . cos( theta ) + center [0], radius * math . sin( theta )
+    + center [1]])
+X3 = np. array (X3)
+
+bw1 = estimate_bandwidth(X1, quantile=0.2)
+bw2 = estimate_bandwidth(X2, quantile=0.2)
+bw3 = estimate_bandwidth(X3, quantile=0.2)
+
+kmeans1 = KMeans(n_clusters=2) # instructions say 2  
+kmeans1. fit(X1)
+#label_predkm = kmeans1. predict(X1)
+
+meanshift1 = MeanShift(bandwidth=bw1). fit(X1)
+#label_predms = meanshift1. predict(X1)
+
+spectral1 = SpectralClustering(n_clusters=2).fit(X1)
+#label_predsc = spectral1. fit_predict(X1)
+
+###
+kmeans2 = KMeans(n_clusters=2) # instructions say 2  
+kmeans2. fit(X2)
+label_predkm = kmeans2. predict(X2)
+
+meanshift2 = MeanShift(bandwidth=bw2). fit(X2)
+label_predms = meanshift2. predict(X2)
+spectral2 = SpectralClustering(n_clusters=2).fit(X2)
+#label_predsc = spectral2. fit_predict(X2)
+###
+
+kmeans3 = KMeans(n_clusters=3) # instructions say k=3
+kmeans3. fit(X3)
+#label_predkm = kmeans3. predict(X3)
+
+meanshift3 = MeanShift(bandwidth=bw3). fit(X3)
+label_predms = meanshift3. predict(X3)
+spectral3 = SpectralClustering(n_clusters=3).fit(X3)
+#label_predsc = spectral3. fit_predict(X3)
+
+
+fig, axs = plt.subplots(1, 3)
+fig.suptitle('X1, X2, X3 Clustering Results')
+# axs[0]
+
+# axs[0].scatter(X1[:, 0], X1[:, 1], c=spectral1.labels_, s=10)
+# axs[1].scatter(X2[:, 0], X2[:, 1], c=spectral2.labels_, s=10)
+# axs[2].scatter(X3[:, 0], X3[:, 1], c=spectral3.labels_, s=10)
+
+axs[0].scatter(X1[:, 0], X1[:, 1], c=meanshift1.labels_, s=10)
+axs[1].scatter(X2[:, 0], X2[:, 1], c=meanshift2.labels_, s=10)
+axs[2].scatter(X3[:, 0], X3[:, 1], c=meanshift3.labels_, s=10)
+  
+
+plt. show ()
